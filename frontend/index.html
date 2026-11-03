@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Backend URL used by script.js. Change this if the API runs elsewhere. -->
+  <meta name="rv-api-base" content="http://127.0.0.1:8000">
+  <meta name="theme-color" content="#101b2c">
+  <title>NoteLens — ₹50 Detector</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="NoteLens home">
+      <img src="assets/logo.svg" alt="" class="brand-logo" width="42" height="42">
+      <span class="brand-copy">
+        <span class="brand-name">note<span>lens</span></span>
+        <span class="brand-caption">CURRENCY INTELLIGENCE</span>
+      </span>
+    </a>
+    <div class="header-right">
+      <span class="header-context">Indian banknote lab <span class="context-divider"></span> ₹50 series</span>
+      <div class="status-group" aria-live="polite">
+        <span class="pill" id="backend-status" data-state="pending"><span class="dot"></span><span class="pill-text">Backend: checking…</span></span>
+        <span class="pill" id="model-status" data-state="pending"><span class="dot"></span><span class="pill-text">Model: checking…</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="intro">
+      <div class="intro-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> SMART CURRENCY RECOGNITION</p>
+        <h1>See every detail.<br><span>Know every note.</span></h1>
+        <p class="intro-description">Instantly identify Indian ₹50 banknotes with computer vision. Use your camera for live scanning or drop in an image to get started.</p>
+      </div>
+      <div class="intro-art" aria-hidden="true">
+        <div class="art-orbit orbit-one"></div>
+        <div class="art-orbit orbit-two"></div>
+        <div class="art-note"><span class="note-top">RESERVE BANK OF INDIA</span><span class="note-value">₹50</span><span class="note-bottom">FIFTY RUPEES</span><span class="note-seal">✳</span></div>
+        <span class="art-spark spark-one"></span><span class="art-spark spark-two"></span>
+      </div>
+    </section>
+
+    <div class="settings-bar card">
+      <div class="settings-title"><span class="settings-icon" aria-hidden="true">⌁</span><div><label for="conf-input">Detection sensitivity</label><span class="settings-caption">Minimum confidence score</span></div></div>
+      <input type="range" id="conf-input" min="0.05" max="0.95" step="0.05" value="0.6">
+      <output id="conf-value" for="conf-input">0.60</output>
+      <span class="hint" id="model-meta"></span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Section A: live webcam -->
+      <section class="card work-card" aria-labelledby="webcam-title">
+        <div class="card-head">
+          <div class="card-heading"><span class="card-kicker">01 / LIVE SCAN</span><h2 id="webcam-title">Camera detection</h2></div>
+          <span class="badge" id="live-badge" hidden>LIVE</span>
+        </div>
+        <div class="stage" id="webcam-stage">
+          <video id="webcam-video" playsinline muted></video>
+          <img id="webcam-result" alt="Annotated webcam frame" hidden>
+          <div class="stage-empty" id="webcam-placeholder"><span class="camera-glyph" aria-hidden="true">⌕</span><strong>Ready when you are</strong><span>Start your camera to scan a note</span></div>
+          <span class="stage-corner corner-tl"></span><span class="stage-corner corner-tr"></span><span class="stage-corner corner-bl"></span><span class="stage-corner corner-br"></span>
+        </div>
+        <div class="controls">
+          <button type="button" class="btn btn-primary" id="btn-camera-start">Start Camera</button>
+          <button type="button" class="btn" id="btn-camera-stop" disabled>Stop Camera</button>
+          <button type="button" class="btn btn-primary" id="btn-detect-start" disabled>Start Detection</button>
+          <button type="button" class="btn" id="btn-detect-stop" disabled>Stop Detection</button>
+        </div>
+        <div class="readout">
+          <span>Notes: <strong id="live-count">–</strong></span>
+          <span>Inference: <strong id="live-ms">–</strong></span>
+          <span>Rate: <strong id="live-rate">–</strong></span>
+        </div>
+        <p class="message" id="webcam-message" role="status"></p>
+        <canvas id="capture-canvas" hidden></canvas>
+      </section>
+
+      <!-- Section B: image upload -->
+      <section class="card work-card" aria-labelledby="upload-title">
+        <div class="card-head">
+          <div class="card-heading"><span class="card-kicker">02 / IMAGE SCAN</span><h2 id="upload-title">Upload an image</h2></div>
+        </div>
+        <label class="dropzone" id="dropzone" for="file-input">
+          <input type="file" id="file-input" accept="image/jpeg,image/png,.jpg,.jpeg,.png">
+          <img id="upload-preview" alt="Selected image preview" hidden>
+          <span class="dropzone-text" id="dropzone-text">
+            <span class="upload-icon" aria-hidden="true">↑</span>
+            <strong>Drop your image here</strong>
+            <span>or <span class="browse-label">browse files</span></span>
+            <small>JPG or PNG · up to 10 MB</small>
+          </span>
+        </label>
+        <div class="controls">
+          <button type="button" class="btn" id="btn-choose">Choose Image</button>
+          <button type="button" class="btn btn-primary" id="btn-upload-detect" disabled>Detect</button>
+          <span class="spinner" id="upload-spinner" hidden aria-label="Detecting"></span>
+          <span class="file-name" id="file-name"></span>
+        </div>
+        <div class="result-wrap" id="upload-result-wrap" hidden>
+          <h3>Result</h3>
+          <img id="upload-result" alt="Annotated upload result">
+          <div class="readout">
+            <span>Notes: <strong id="upload-count">–</strong></span>
+            <span>Confidence: <strong id="upload-conf">–</strong></span>
+            <span>Inference: <strong id="upload-ms">–</strong></span>
+          </div>
+        </div>
+        <p class="message" id="upload-message" role="status"></p>
+      </section>
+    </div>
+
+    <!-- Section C: statistics -->
+    <section class="stats-section" aria-labelledby="stats-title">
+      <div class="section-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> AT A GLANCE</p><h2 id="stats-title" class="section-title">Scan overview</h2></div><span class="hint" id="stats-source"></span></div>
+      <div class="stats">
+        <div class="card stat">
+          <span class="stat-label">Current detections</span>
+          <span class="stat-value" id="stat-count">–</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-label">Highest confidence</span>
+          <span class="stat-value" id="stat-conf">–</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-label">Latest inference time</span>
+          <span class="stat-value" id="stat-ms">–</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-label">Backend / model</span>
+          <span class="stat-value stat-value-sm" id="stat-status">–</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section D: results table -->
+    <section class="card results-card" aria-labelledby="results-title">
+      <div class="card-head">
+        <div class="card-heading"><span class="card-kicker">SCAN OUTPUT</span><h2 id="results-title">Detection results</h2></div>
+        <span class="hint" id="results-meta"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Label</th><th>Confidence</th><th>Bounding box (x1, y1, x2, y2)</th><th>Size</th></tr>
+          </thead>
+          <tbody id="results-body">
+            <tr class="empty-row"><td colspan="5">No detections yet. Upload an image or start live detection.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span class="footer-brand">notelens<span>®</span></span>
+    <span>Built for clarity. Powered by YOLOv8 ONNX &amp; OpenCV DNN.</span>
+    <a href="/docs" id="docs-link">API documentation <span aria-hidden="true">↗</span></a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

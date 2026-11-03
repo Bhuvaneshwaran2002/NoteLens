@@ -1,0 +1,9 @@
+# Single-class dataset: only the NEW light blue-green ₹50 note (front or back).
+# Paths are relative to this file's folder (dataset/).
+train: images/train
+val: images/val
+test: images/test
+
+nc: 1
+names:
+  0: rupee_50
