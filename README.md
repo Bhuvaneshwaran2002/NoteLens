@@ -134,5 +134,3 @@ GitHub: https://github.com/Bhuvaneshwaran2002
 Project: NoteLens – ₹50 Indian Currency Note Detection
 
 ---
-
-**Note:** This project is developed as part of the ZED Digital FEDS Problem Statement 3.
