@@ -1,71 +1,138 @@
-# ₹50 Note Detector — ZED Digital (FEDS Problem Statement 3)
+# NoteLens – ₹50 Indian Currency Note Detection
 
-Detects **only the new light blue-green ₹50 note** (front and back) in a live
-webcam feed and draws a box labelled **“₹50”** with the confidence score.
-The trained YOLOv8 model is exported to **ONNX** and runs through **OpenCV DNN**,
-so no PyTorch/Ultralytics install is needed to run it.
+## Project Overview
 
-## Install and run
+NoteLens is a real-time Indian currency detection system designed to identify the **new light blue-green ₹50 banknote** (front and back) using a webcam feed.
+
+The system uses a trained **YOLOv8 object detection model** exported to **ONNX format** and performs inference using **OpenCV DNN**. It detects ₹50 currency notes and displays a bounding box labelled **₹50** along with the confidence score.
+
+## Key Features
+
+- Real-time ₹50 currency note detection using a webcam.
+- Supports both front and back sides of the new ₹50 note.
+- YOLOv8-based object detection.
+- ONNX model integration for lightweight inference.
+- OpenCV DNN-based detection without requiring PyTorch or Ultralytics at runtime.
+- Displays bounding boxes and confidence scores.
+- Supports saving detection snapshots.
+
+## Technologies Used
+
+- **Programming Language:** Python
+- **Object Detection:** YOLOv8
+- **Model Format:** ONNX
+- **Computer Vision:** OpenCV DNN
+- **Camera Input:** OpenCV VideoCapture
+
+## Project Structure
+
+```text
+NoteLens/
+│
+├── backend/
+│   ├── models/
+│   │   └── model.onnx
+│   │
+│   ├── outputs/
+│   │
+│   ├── test.py
+│   └── requirements.txt
+│
+├── README.md
+└── .gitignore
+```
+
+## Installation and Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Bhuvaneshwaran2002/NoteLens.git
+```
+
+### 2. Navigate to the Backend Directory
+
+```bash
+cd NoteLens/backend
+```
+
+### 3. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+### 4. Activate the Virtual Environment
+
+**Windows:**
+
+```bash
+.venv\Scripts\activate
+```
+
+### 5. Install Dependencies
 
 ```bash
 python -m pip install -r requirements.txt
+```
+
+## Run the Application
+
+Connect your webcam and execute:
+
+```bash
 python test.py --model model.onnx
 ```
 
-`model.onnx` is at the repository root. If `--model` is omitted, `test.py`
-looks for `./model.onnx` and then `./models/model.onnx`.
+The application will start the webcam feed and detect the supported ₹50 currency note in real time.
 
-Keys: **q / Esc** quit, **s** save a snapshot to `outputs/`.
+**Model Location:**
 
-Useful options:
+The `model.onnx` file should be placed in the backend root directory or inside the `models/` directory.
 
-```bash
-python test.py --camera 1 --conf 0.6 --iou 0.45
-python test.py --source photo.jpg --save      # test an image
-python test.py --source samples/ --save       # test a folder of images
-python test.py --source clip.mp4 --save       # test a video
-```
+If the `--model` argument is omitted, the application looks for `./model.onnx` and then `./models/model.onnx`.
 
-## Train
+## Keyboard Controls
 
-The dataset folder is ready, but **you must add your own photos and labels**
-(see [`dataset/README.md`](dataset/README.md)). Then:
+| Key | Function |
+|---|---|
+| `Q` | Quit the application |
+| `ESC` | Exit the application |
+| `S` | Save a detection snapshot |
 
-```bash
-pip install ultralytics
-python scripts/prelabel.py --source photos/      # optional first pass, then review
-python scripts/validate_dataset.py
-python train.py --data dataset/data.yaml --model yolov8n.pt --epochs 100 --imgsz 512
-```
+Saved snapshots are stored in the `outputs/` directory.
 
-Training writes `runs/rs50/weights/best.pt` and exports the ONNX model to
-`model.onnx` (and `models/model.onnx`). The export uses a **512×512** input and a
-single class, `rupee_50`.
+## Model Information
 
-## What is in the repo
+- **Model Architecture:** YOLOv8
+- **Model Format:** ONNX
+- **Inference Engine:** OpenCV DNN
+- **Detection Target:** New light blue-green ₹50 Indian banknote
+- **Detection Views:** Front and back
 
-| Path | Purpose |
-| --- | --- |
-| `test.py` | Webcam test script required by the assignment (`₹50` + confidence) |
-| `train.py` | Training + ONNX export |
-| `model.onnx` | Trained ONNX model (OpenCV-ready) |
-| `dataset/` | Placeholder layout + `data.yaml`; add your own photos/labels |
-| `src/` | Shared ONNX preprocessing, decoding, NMS, drawing |
-| `scripts/self_check.py` | Offline correctness checks without a webcam |
-| `scripts/validate_dataset.py` | Dataset/label sanity checks |
-| `scripts/prelabel.py` | First-pass labels from raw photos (review before training) |
-| `model_improvement/` | Optional experiment harness and evaluation tools |
-| `backend/`, `frontend/` | Optional browser demo (not needed for the assignment) |
+## Expected Output
 
-## Model details
+The application displays a live webcam feed with:
+- Bounding boxes around detected ₹50 notes.
+- ₹50 denomination labels.
+- Confidence scores for detected objects.
 
-- YOLOv8n, single class `0: rupee_50`, input `512×512`, output `[1, 5, 5376]`
-- Confidence threshold `0.6`, NMS IoU `0.45` (configurable with `--conf` / `--iou`)
-- Pre/post-processing (letterbox, decode, class-aware NMS) in `src/onnx_utils.py`
+## Future Enhancements
 
-## Quick offline verification
+- Support for additional Indian currency denominations.
+- Fake currency detection and authenticity verification.
+- Improved detection under different lighting conditions.
+- Mobile application integration.
+- Currency recognition using image uploads.
 
-```bash
-python scripts/self_check.py --model model.onnx
-python scripts/self_check.py --source backend/tests/fixtures/rupee50_train_sample.jpg
-```
+## Author
+
+**Bhuvaneshwaran R**
+
+GitHub: https://github.com/Bhuvaneshwaran2002
+
+Project: NoteLens – ₹50 Indian Currency Note Detection
+
+---
+
+**Note:** This project is developed as part of the ZED Digital FEDS Problem Statement 3.
